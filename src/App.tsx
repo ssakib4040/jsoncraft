@@ -1,12 +1,13 @@
 import { useState } from "react";
 import Editor from "@monaco-editor/react";
+import Header from "./components/Header";
 
 export default function App() {
   const [code, setCode] = useState<string>("");
 
   return (
     <div>
-      <p>App</p>
+      <Header />
 
       <div className="flex flex-col lg:flex-row">
         <div className="lg:basis-6/12">

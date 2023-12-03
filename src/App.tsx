@@ -12,7 +12,7 @@ export default function App() {
       <div className="flex flex-col lg:flex-row">
         <div className="lg:basis-6/12">
           <Editor
-            height="90vh"
+            height="100vh"
             theme="vs-dark"
             defaultLanguage="json"
             onChange={(value) => {
@@ -26,7 +26,7 @@ export default function App() {
 
         <div className="lg:basis-6/12">
           <Editor
-            height="90vh"
+            height="100vh"
             theme="vs-dark"
             defaultLanguage="json"
             value={code}

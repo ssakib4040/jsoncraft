@@ -1,22 +1,33 @@
-import { useEffect, useState } from "react";
-import Editor from "@monaco-editor/react";
+import { lazy, useEffect, useState } from "react";
+// import Editor from "@monaco-editor/react";
 import Header from "./components/Header";
 
-// const functionList: string[] = [
-//   "generateName()",
-//   "generateNumber()",
-//   "generateBoolean()",
-//   "generateArray()",
-// ];
+const Editor = lazy(() => import("@monaco-editor/react"));
+
+import utils from "./utils";
+import { defaultCode } from "./utils/constants";
 
 export default function App() {
+  const [code, setCode] = useState<string>(defaultCode);
+  const [generatedCode, setGeneratedCode] = useState("");
+
+  console.log("deb", generatedCode);
+
+  useEffect(() => {
+    const processedString = finalProcessedInput(code);
+
+    console.log("deb", processedString)
+
+
+    setGeneratedCode(processedString);
+  }, []);
+
   const [firstContainerWidth, setFirstContainerWidth] = useState(
     window.innerWidth / 2
   );
   const [secondContainerWidth, setSecondContainerWidth] = useState(
     window.innerWidth / 2
   );
-
   useEffect(() => {
     window.addEventListener("resize", () => {
       setFirstContainerWidth(window.innerWidth / 2);
@@ -24,157 +35,130 @@ export default function App() {
     });
   }, []);
 
+  const generateNewJsonCode = (newValue: string | undefined) => {
+    setCode(newValue || "");
+
+    const processedString = finalProcessedInput(newValue);
+    setGeneratedCode(processedString);
+  };
+
+  // const jsonString = `[
+  //   "{{for(10)}}",
+  //   {
+  //     "name": "{{test22()}}",
+  //     "age": 123
+  //   }
+  // ]`;
+
+  function processForeachString(jsonString: string) {
+    const regex = /{{for\((\d+)\)}}/g;
+    const matches = jsonString.toString().match(regex);
+
+    if (!matches) return jsonString;
+
+    const matchedNumber = matches[0].match(/\d+/g)[0];
+    const parsedNumber = parseInt(matchedNumber);
+
+    jsonString.shift();
+
+    const newJson = [];
+
+    for (let i = 0; i < parsedNumber; i++) {
+      jsonString.forEach((element) => {
+        newJson.push(element);
+      });
+    }
+
+    return JSON.stringify(newJson);
+  }
+
+  function processTemplateString(jsonString: string) {
+    const regex = /{{(\w+)\(\)}}/g;
+    const matches = jsonString.toString().match(regex);
+
+    if (!matches) return jsonString;
+
+    const data = jsonString.replace(regex, (match, functionName) => {
+      if (utils[functionName] && typeof utils[functionName] === "function") {
+        return utils[functionName]();
+      }
+      return match; // Return placeholder if function doesn't exist in utils
+    });
+
+    // const matchedString = matches[0].match(/\w+/g)[0];
+
+    // console.log(utils);
+
+    // jsonString = jsonString.replace(matches[0], utils[matchedString]());
+
+    return data;
+  }
+
+  function finalProcessedInput(jsonString: string) {
+    // console.log(utils)
+    try {
+      JSON.parse(jsonString);
+    } catch (error) {
+      console.error(error);
+      return;
+    }
+
+    const parsedData = JSON.parse(jsonString);
+
+    // detect for expression
+    const data = processForeachString(parsedData);
+    const templateStringData = processTemplateString(data);
+    return templateStringData;
+
+    // setGeneratedCode(templateStringData);
+  }
+
+  function isValidJSon(jsonString: string) {
+    try {
+      JSON.parse(jsonString);
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+    return true;
+  }
+
+  // finalProcessedInput(jsonString);
+
+  const loader = <span className="loading loading-spinner loading-lg"></span>;
+
   return (
-    <div className="">
+    <>
       <Header />
 
       <div className="flex lg:h-[calc(100%-64px)] ">
         <div className="basis-full overflow-y-hidden">
           <div className="flex flex-row ">
-            {/* content */}
             <div className="lg:basis-6/12">
-              {/* <input type="range" /> */}
               <Editor
                 width={firstContainerWidth}
+                loading={loader}
                 height="100vh"
-                // height={`${screenHeight - 64}px`}
                 theme="vs-dark"
                 defaultLanguage="json"
-                // value={generatedCode}
-                // defaultValue="// some comment"
+                onChange={generateNewJsonCode}
+                value={code}
               />
             </div>
 
             <div className="lg:basis-6/12">
               <Editor
                 width={secondContainerWidth}
+                loading={loader}
                 height="100vh"
-                // height={`${screenHeight - 64}px`}
                 theme="vs-dark"
                 defaultLanguage="json"
-                // value={generatedCode}
-                // defaultValue="// some comment"
+                value={JSON.stringify(generatedCode, null, 2) || ""}
               />
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-export function App2() {
-  const [code, setCode] = useState<string>("");
-  const [generatedCode, setGeneratedCode] = useState("");
-
-  const generateNewJsonCode = (newValue: string | undefined) => {
-    setCode(newValue || "");
-
-    const processedString = processInput(newValue);
-    setGeneratedCode(processedString);
-  };
-
-  function processInput(input: string | undefined) {
-    const jsonString = JSON.stringify(input);
-
-    const processedString = jsonString.replace(
-      /{{(.*?)}}/g,
-      (match, functionCall) => {
-        const [func, args] = functionCall.split("("); // Split the function and its arguments
-        if (func === "loop") {
-          const loopCount = parseInt(args.replace(/\D/g, "")); // Extract the loop count
-          let loopContent = "";
-          for (let i = 0; i < loopCount; i++) {
-            const content = jsonString.replace(/{"{{loop\(\d+\)}}":\[|]}/g, ""); // Remove loop placeholders
-            loopContent += content;
-          }
-          return loopContent;
-        } else if (typeof window[func] === "function") {
-          // Recursively replace function calls within strings
-          return match.replace(`{{${functionCall}}}`, window[func]());
-        } else {
-          return match;
-        }
-      }
-    );
-
-    // Reconstruct the JSON object
-    const processedJSON = JSON.parse(processedString);
-    return processedJSON;
-  }
-
-  return (
-    <div className="dev h-screen">
-      <Header />
-
-      <div className="flex h-fit">
-        <div className="basis-[300px]">
-          {/* {functionList.map((name: string, index: number) => {
-            return (
-              <div
-                className="px-3 py-2 m-2 rounded-lg cursor-pointer transition hover:bg-zinc-200"
-                key={index}
-              >
-                {name}
-              </div>
-            );
-          })} */}
-
-          <div className="drawer lg:drawer-open">
-            <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-            <div className="drawer-content flex flex-col items-center justify-center">
-              {/* <!-- Page content here --> */}
-              <label
-                htmlFor="my-drawer-2"
-                className="btn btn-primary drawer-button lg:hidden"
-              >
-                Open drawer
-              </label>
-            </div>
-            <div className="drawer-side">
-              <label
-                htmlFor="my-drawer-2"
-                aria-label="close sidebar"
-                className="drawer-overlay"
-              ></label>
-              <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
-                {/* <!-- Sidebar content here --> */}
-                <li>
-                  <a>Sidebar Item 1</a>
-                </li>
-                <li>
-                  <a>Sidebar Item 2</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="basis-full  dev">
-          <div className="flex flex-col lg:flex-row">
-            <div className="lg:basis-6/12">
-              <Editor
-                height="100vh"
-                theme="vs-dark"
-                defaultLanguage="json"
-                onChange={generateNewJsonCode}
-                value={code}
-                // defaultValue="// some comment"
-              />
-            </div>
-
-            <div className="lg:basis-6/12">
-              <Editor
-                height="100vh"
-                theme="vs-dark"
-                defaultLanguage="json"
-                value={generatedCode}
-                // defaultValue="// some comment"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }

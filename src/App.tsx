@@ -11,13 +11,12 @@ export default function App() {
   const [code, setCode] = useState<string>(defaultCode);
   const [generatedCode, setGeneratedCode] = useState("");
 
-  console.log("deb", generatedCode);
+  // console.log("deb", generatedCode);
 
   useEffect(() => {
-    const processedString = finalProcessedInput(code);
+    const processedString: any = finalProcessedInput(code);
 
-    console.log("deb", processedString)
-
+    // console.log("deb", processedString)
 
     setGeneratedCode(processedString);
   }, []);
@@ -35,10 +34,10 @@ export default function App() {
     });
   }, []);
 
-  const generateNewJsonCode = (newValue: string | undefined) => {
+  const generateNewJsonCode = (newValue: string) => {
     setCode(newValue || "");
 
-    const processedString = finalProcessedInput(newValue);
+    const processedString: any = finalProcessedInput(newValue);
     setGeneratedCode(processedString);
   };
 
@@ -112,18 +111,6 @@ export default function App() {
 
     // setGeneratedCode(templateStringData);
   }
-
-  function isValidJSon(jsonString: string) {
-    try {
-      JSON.parse(jsonString);
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
-    return true;
-  }
-
-  // finalProcessedInput(jsonString);
 
   const loader = <span className="loading loading-spinner loading-lg"></span>;
 

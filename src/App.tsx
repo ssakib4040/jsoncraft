@@ -34,12 +34,12 @@ export default function App() {
     });
   }, []);
 
-  const generateNewJsonCode = (newValue: string) => {
+  function generateNewJsonCode(newValue: string | undefined) {
     setCode(newValue || "");
 
-    const processedString: any = finalProcessedInput(newValue);
+    const processedString: any = finalProcessedInput(newValue || "");
     setGeneratedCode(processedString);
-  };
+  }
 
   // const jsonString = `[
   //   "{{for(10)}}",

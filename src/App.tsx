@@ -10,22 +10,17 @@ import Header from "./components/Header";
 // ];
 
 export default function App() {
-  // const firstContainer = useRef(null);
-  // const secondContainer = useRef(null);
-
-  const [firstContainerWidth, setFirstContainerWidth] = useState(window.innerWidth / 2);
-  const [secondContainerWidth, setSecondContainerWidth] = useState(window.innerWidth / 2);
+  const [firstContainerWidth, setFirstContainerWidth] = useState(
+    window.innerWidth / 2
+  );
+  const [secondContainerWidth, setSecondContainerWidth] = useState(
+    window.innerWidth / 2
+  );
 
   useEffect(() => {
     window.addEventListener("resize", () => {
-      // console.log(firstContainer.current.offsetWidth);
-
-      // half of window.innerWidth
       setFirstContainerWidth(window.innerWidth / 2);
       setSecondContainerWidth(window.innerWidth / 2);
-
-      // setFirstContainerWidth(firstContainer.current.offsetWidth);
-      // setSecondContainerWidth(secondContainer.current.offsetWidth);
     });
   }, []);
 
@@ -33,28 +28,7 @@ export default function App() {
     <div className="">
       <Header />
 
-      {/* <input
-        type="range"
-        value={width / 10}
-        onChange={(e) => setWidth(parseInt(e.target.value) * 10)}
-      /> */}
-
       <div className="flex lg:h-[calc(100%-64px)] ">
-        {/* <div className="w-[300px]">
-          sidebar */}
-        {/* {functionList.map((name: string, index: number) => {
-            return (
-              <div
-                className="px-3 py-2 m-2 rounded-lg cursor-pointer transition hover:bg-zinc-200"
-                key={index}
-              >
-                {name}
-              </div>
-            );
-          })} */}
-
-        {/* </div> */}
-
         <div className="basis-full overflow-y-hidden">
           <div className="flex flex-row ">
             {/* content */}

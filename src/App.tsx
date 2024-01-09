@@ -11,15 +11,14 @@ export default function App() {
   const [code, setCode] = useState<string>(defaultCode);
   const [generatedCode, setGeneratedCode] = useState("");
 
-  // console.log("deb", generatedCode);
-
   useEffect(() => {
-    const processedString: any = finalProcessedInput(code);
+    const processedString = finalProcessedInput(code) as string;
 
-    // console.log("deb", processedString)
+    if (!processedString) return;
 
-    setGeneratedCode(processedString);
-  }, []);
+    setGeneratedCode(JSON.parse(processedString));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code]);
 
   const [firstContainerWidth, setFirstContainerWidth] = useState(
     window.innerWidth / 2
@@ -37,30 +36,25 @@ export default function App() {
   function generateNewJsonCode(newValue: string | undefined) {
     setCode(newValue || "");
 
-    const processedString: any = finalProcessedInput(newValue || "");
-    setGeneratedCode(processedString);
+    const processedString = finalProcessedInput(code) as string;
+    setGeneratedCode(JSON.parse(processedString));
   }
 
-  // const jsonString = `[
-  //   "{{for(10)}}",
-  //   {
-  //     "name": "{{test22()}}",
-  //     "age": 123
-  //   }
-  // ]`;
-
-  function processForeachString(jsonString: string) {
+  function processForeachString(jsonString: unknown[]): string {
     const regex = /{{for\((\d+)\)}}/g;
     const matches = jsonString.toString().match(regex);
 
-    if (!matches) return jsonString;
+    if (!matches) return JSON.stringify(jsonString);
 
-    const matchedNumber = matches[0].match(/\d+/g)[0];
-    const parsedNumber = parseInt(matchedNumber);
+    const matchedNumber = matches[0]?.match(/\d+/g)?.[0];
+
+    const parsedNumber = parseInt(matchedNumber as string);
+
+    console.log();
 
     jsonString.shift();
 
-    const newJson = [];
+    const newJson: unknown[] = [];
 
     for (let i = 0; i < parsedNumber; i++) {
       jsonString.forEach((element) => {
@@ -71,46 +65,58 @@ export default function App() {
     return JSON.stringify(newJson);
   }
 
-  function processTemplateString(jsonString: string) {
+  function processTemplateString(jsonString: string): string {
     const regex = /{{(\w+)\(\)}}/g;
     const matches = jsonString.toString().match(regex);
 
     if (!matches) return jsonString;
 
     const data = jsonString.replace(regex, (match, functionName) => {
+      // @ts-expect-error intentionally using bracket notation
       if (utils[functionName] && typeof utils[functionName] === "function") {
+        // @ts-expect-error intentionally using bracket notation
         return utils[functionName]();
       }
       return match; // Return placeholder if function doesn't exist in utils
     });
 
-    // const matchedString = matches[0].match(/\w+/g)[0];
-
-    // console.log(utils);
-
-    // jsonString = jsonString.replace(matches[0], utils[matchedString]());
-
     return data;
   }
 
-  function finalProcessedInput(jsonString: string) {
-    // console.log(utils)
+  function finalProcessedInput(jsonString: string): string | null {
     try {
       JSON.parse(jsonString);
     } catch (error) {
-      console.error(error);
-      return;
+      console.error("Error: Invalid JSON input");
+      return null;
     }
 
-    const parsedData = JSON.parse(jsonString);
+    const parsedData: unknown[] = JSON.parse(jsonString);
 
     // detect for expression
-    const data = processForeachString(parsedData);
-    const templateStringData = processTemplateString(data);
+    const postForeachProcessedString: string = processForeachString(parsedData);
+    const templateStringData = processTemplateString(
+      postForeachProcessedString
+    );
     return templateStringData;
-
-    // setGeneratedCode(templateStringData);
   }
+
+  // const tempCode = `[
+  //   {
+  //     "id": 1,
+  //     "name": "John Doe",
+  //     "email": "john@example.com"
+  //   }
+  // ]`;
+
+  // const tempCode2 = `[
+  //   "{{for(5)}}",
+  //   {
+  //     "id": 1
+  //   }
+  // ]`;
+
+  // console.log(finalProcessedInput(tempCode));
 
   const loader = <span className="loading loading-spinner loading-lg"></span>;
 

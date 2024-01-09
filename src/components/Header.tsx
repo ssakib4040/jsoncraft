@@ -15,8 +15,12 @@ export default function Header() {
             <select name="" id="">
               <option value="">API List</option>
 
-              {Object.keys(utils).map((item) => {
-                return <option value={item}>{item}</option>;
+              {Object.keys(utils).map((item, index) => {
+                return (
+                  <option value={item} key={index}>
+                    {item}
+                  </option>
+                );
               })}
 
               {/* {utils.map((item) => {

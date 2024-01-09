@@ -1,7 +1,7 @@
 const defaultCode = `[
     "{{for(5)}}",
     {
-        "id": 1,
+        "id": "{{generateID()}}",
         "name": "John Doe"
     }
 ]

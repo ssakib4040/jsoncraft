@@ -10,6 +10,7 @@ import { defaultCode } from "./utils/constants";
 export default function App() {
   const [code, setCode] = useState<string>(defaultCode);
   const [generatedCode, setGeneratedCode] = useState("");
+  const [isInvalidJson, setIsInvalidJson] = useState(false);
 
   useEffect(() => {
     const processedString = finalProcessedInput(code) as string;
@@ -88,8 +89,11 @@ export default function App() {
       JSON.parse(jsonString);
     } catch (error) {
       console.error("Error: Invalid JSON input");
+      setIsInvalidJson(true);
       return null;
     }
+
+    setIsInvalidJson(false);
 
     const parsedData: unknown[] = JSON.parse(jsonString);
 
@@ -100,23 +104,6 @@ export default function App() {
     );
     return templateStringData;
   }
-
-  // const tempCode = `[
-  //   {
-  //     "id": 1,
-  //     "name": "John Doe",
-  //     "email": "john@example.com"
-  //   }
-  // ]`;
-
-  // const tempCode2 = `[
-  //   "{{for(5)}}",
-  //   {
-  //     "id": 1
-  //   }
-  // ]`;
-
-  // console.log(finalProcessedInput(tempCode));
 
   const loader = <span className="loading loading-spinner loading-lg"></span>;
 
@@ -137,6 +124,12 @@ export default function App() {
                 onChange={generateNewJsonCode}
                 value={code}
               />
+
+              {isInvalidJson && (
+                <div className="fixed bottom-0 bg-red-600 text-white rounded px-4 py-3">
+                  Invalid JSON input
+                </div>
+              )}
             </div>
 
             <div className="lg:basis-6/12">

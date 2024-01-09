@@ -1,3 +1,5 @@
+import utils from "../utils";
+
 export default function Header() {
   return (
     <header className="top-0 sticky z-50">
@@ -10,6 +12,19 @@ export default function Header() {
           </a>
 
           <div className="flex items-center lg:order-2">
+            <select name="" id="">
+              <option value="">API List</option>
+
+              {Object.keys(utils).map((item) => {
+                console.log(item);
+                return <option value={item}>{item}</option>;
+              })}
+
+              {/* {utils.map((item) => {
+                console.log(item)
+                return <option value={item.name}>{item.name}</option>;
+              })} */}
+            </select>
             <a
               href="https://github.com/ssakib4040/jsoncraft"
               target="_blank"

@@ -16,7 +16,6 @@ export default function Header() {
               <option value="">API List</option>
 
               {Object.keys(utils).map((item) => {
-                console.log(item);
                 return <option value={item}>{item}</option>;
               })}
 

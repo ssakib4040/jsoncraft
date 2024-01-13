@@ -6,6 +6,7 @@ const defaultCode = `[
         "age": "{{age()}}",
         "gender": "{{gender()}}",
         "email": "{{email()}}",
+        "phone": "{{phone()}}",
         "isActive": "{{boolean()}}"
     }
 ]

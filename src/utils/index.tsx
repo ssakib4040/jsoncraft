@@ -33,6 +33,10 @@ function email() {
   return faker.internet.email();
 }
 
+function phone() {
+  return faker.phone.number();
+}
+
 function boolean() {
   return Math.random() < 0.5;
 }
@@ -45,5 +49,6 @@ export default {
   age,
   gender,
   email,
+  phone,
   boolean,
 };

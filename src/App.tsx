@@ -1,16 +1,22 @@
 import { lazy, useEffect, useState } from "react";
-// import Editor from "@monaco-editor/react";
 import Header from "./components/Header";
 
 const Editor = lazy(() => import("@monaco-editor/react"));
 
-import utils from "./utils";
 import { defaultCode } from "./utils/constants";
+
+import {
+  isValidJson,
+  processForeachString,
+  processTemplateString,
+} from "./utils/internal";
 
 export default function App() {
   const [code, setCode] = useState<string>(defaultCode);
   const [generatedCode, setGeneratedCode] = useState("");
-  const [isInvalidJson, setIsInvalidJson] = useState(false);
+  const [errors, setErrors] = useState({
+    json: "",
+  });
 
   useEffect(() => {
     const processedString = finalProcessedInput(code) as string;
@@ -37,64 +43,23 @@ export default function App() {
   function generateNewJsonCode(newValue: string | undefined) {
     setCode(newValue || "");
 
-    const processedString = finalProcessedInput(code) as string;
+    const processedString: string = finalProcessedInput(code) as string;
     setGeneratedCode(JSON.parse(processedString));
   }
 
-  function processForeachString(jsonString: unknown[]): string {
-    const regex = /{{for\((\d+)\)}}/g;
-    const matches = jsonString.toString().match(regex);
-
-    if (!matches) return JSON.stringify(jsonString);
-
-    const matchedNumber = matches[0]?.match(/\d+/g)?.[0];
-
-    const parsedNumber = parseInt(matchedNumber as string);
-
-    console.log();
-
-    jsonString.shift();
-
-    const newJson: unknown[] = [];
-
-    for (let i = 0; i < parsedNumber; i++) {
-      jsonString.forEach((element) => {
-        newJson.push(element);
-      });
-    }
-
-    return JSON.stringify(newJson);
-  }
-
-  function processTemplateString(jsonString: string): string {
-    const regex = /{{(\w+)\(\)}}/g;
-    const matches = jsonString.toString().match(regex);
-
-    if (!matches) return jsonString;
-
-    const data = jsonString.replace(regex, (match, functionName) => {
-      // @ts-expect-error intentionally using bracket notation
-      if (utils[functionName] && typeof utils[functionName] === "function") {
-        // @ts-expect-error intentionally using bracket notation
-        return utils[functionName]();
-      }
-      return match; // Return placeholder if function doesn't exist in utils
-    });
-
-    return data;
-  }
-
   function finalProcessedInput(jsonString: string): string | null {
-    try {
-      JSON.parse(jsonString);
-    } catch (error) {
-      console.error("Error: Invalid JSON input");
-      setIsInvalidJson(true);
+    if (!isValidJson(jsonString)) {
+      setErrors({
+        ...errors,
+        json: "Invalid JSON input",
+      });
       return null;
     }
 
-    setIsInvalidJson(false);
-
+    setErrors({
+      ...errors,
+      json: "",
+    });
     const parsedData: unknown[] = JSON.parse(jsonString);
 
     // detect for expression
@@ -125,7 +90,7 @@ export default function App() {
                 value={code}
               />
 
-              {isInvalidJson && (
+              {errors.json && (
                 <div className="fixed bottom-0 bg-red-600 text-white rounded px-4 py-3">
                   Invalid JSON input
                 </div>

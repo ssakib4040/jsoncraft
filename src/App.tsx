@@ -110,6 +110,15 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      <footer className="fixed bottom-0 left-0 right-0 bg-zinc-800 z-[999] p-3 flex justify-between">
+        <div>
+          <a href="#" target="_blank" rel="noreferrer" className="text-white">
+            Made in Bangladesh 🇧🇩
+          </a>
+        </div>
+        <div>2</div>
+      </footer>
     </>
   );
 }

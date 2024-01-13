@@ -25,20 +25,20 @@ JSONCraft simplifies the process of creating mock JSON code with a user-friendly
 
 ## Usage
 
-1. Visit the [JSONCraft website](https://your-jsoncraft-website-url.com).
+1. Visit the [JSONCraft website](https://jsoncraft.vercel.app/).
 2. Customize your mock JSON code using the intuitive interface.
 3. Click the "Generate" button to create your customized JSON code.
 4. Copy the generated JSON code to use in your projects.
 
 ## Demo
 
-![JSONCraft Demo](link-to-demo-gif-or-screenshot.gif)
+<!-- ![JSONCraft Demo](link-to-demo-gif-or-screenshot.gif) -->
 
-Check out a live demo of JSONCraft [here](https://your-jsoncraft-website-url.com/demo).
+Check out a live demo of JSONCraft [here](https://jsoncraft.vercel.app/).
 
 ## Getting Started
 
-To use JSONCraft, simply visit the [website](https://your-jsoncraft-website-url.com) and start customizing your mock JSON code. There's no need for installation or setup – it's all accessible in your browser.
+To use JSONCraft, simply visit the [website](https://jsoncraft.vercel.app/) and start customizing your mock JSON code. There's no need for installation or setup – it's all accessible in your browser.
 
 ## Contributing
 

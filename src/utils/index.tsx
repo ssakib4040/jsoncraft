@@ -41,6 +41,18 @@ function boolean() {
   return Math.random() < 0.5;
 }
 
+function profileImage() {
+  return faker.image.avatar();
+}
+
+function password() {
+  return faker.internet.password();
+}
+
+function username() {
+  return faker.internet.userName();
+}
+
 export default {
   uuid,
   fullName,
@@ -51,4 +63,7 @@ export default {
   email,
   phone,
   boolean,
+  profileImage,
+  password,
+  username,
 };

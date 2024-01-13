@@ -23,7 +23,6 @@ export default function App() {
 
   useEffect(() => {
     const processedString = finalProcessedInput(code) as string;
-
     if (!processedString) return;
 
     setGeneratedCode(JSON.parse(processedString));
@@ -45,9 +44,6 @@ export default function App() {
 
   function generateNewJsonCode(newValue: string | undefined) {
     setCode(newValue || "");
-
-    const processedString: string = finalProcessedInput(code) as string;
-    setGeneratedCode(JSON.parse(processedString));
   }
 
   function finalProcessedInput(jsonString: string): string | null {
@@ -89,7 +85,6 @@ export default function App() {
     }, 2000);
   };
   const handleDownload = () => {
-
     const blob = new Blob([JSON.stringify(generatedCode, null, 2)], {
       type: "application/json",
     });

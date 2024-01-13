@@ -1,11 +1,20 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 
 import utils from "../utils";
 
 export default function Header() {
-  const [selected, setSelected] = useState("uuid");
+  const [options, setOptions] = useState<string[]>([]);
+  const selected: string = "API functions List";
+
+  useEffect(() => {
+    const options: string[] = Object.keys(utils).map((funcName) => {
+      return funcName;
+    });
+
+    setOptions(options);
+  }, []);
 
   return (
     <header className="top-0 sticky z-50">
@@ -19,7 +28,7 @@ export default function Header() {
 
           <div className="flex items-center lg:order-2">
             <div className=" w-72">
-              <Listbox value={selected} onChange={setSelected}>
+              <Listbox value={selected} onChange={() => {}}>
                 <div className="relative mt-1">
                   <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
                     <span className="block truncate">{selected}</span>
@@ -37,12 +46,12 @@ export default function Header() {
                     leaveTo="opacity-0"
                   >
                     <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
-                      {Object.keys(utils).map((funcName, personIdx) => {
+                      {options.map((funcName, personIdx) => {
                         return (
                           <Listbox.Option
                             key={personIdx}
                             className={({ active }) =>
-                              `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              `relative cursor-default select-none py-2 pl-4 pr-4 ${
                                 active
                                   ? "bg-blue-100 text-blue-900"
                                   : "text-gray-900"
@@ -59,14 +68,14 @@ export default function Header() {
                                 >
                                   {funcName}
                                 </span>
-                                {selected ? (
+                                {/* {selected ? (
                                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
                                     <CheckIcon
                                       className="h-5 w-5"
                                       aria-hidden="true"
                                     />
                                   </span>
-                                ) : null}
+                                ) : null} */}
                               </>
                             )}
                           </Listbox.Option>

@@ -1,8 +1,12 @@
 const defaultCode = `[
     "{{for(5)}}",
     {
-        "id": "{{generateID()}}",
-        "name": "John Doe"
+        "id": "{{uuid()}}",
+        "name": "{{firstName()}} {{lastName()}}",
+        "age": "{{age()}}",
+        "gender": "{{gender()}}",
+        "email": "{{email()}}",
+        "isActive": "{{boolean()}}"
     }
 ]
 `;

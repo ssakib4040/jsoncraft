@@ -5,7 +5,7 @@ import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import utils from "../utils";
 
 export default function Header() {
-  const [selected, setSelected] = useState("generateID");
+  const [selected, setSelected] = useState("uuid");
 
   return (
     <header className="top-0 sticky z-50">

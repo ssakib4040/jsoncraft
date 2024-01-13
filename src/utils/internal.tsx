@@ -27,8 +27,6 @@ export function processTemplateString(jsonString: string): string {
   const regex = /{{(\w+)\(\)}}/g;
   const matches = jsonString.toString().match(regex);
 
-  console.log(jsonString);
-
   if (!matches) return jsonString;
 
   const data = jsonString.replace(regex, (match, functionName) => {

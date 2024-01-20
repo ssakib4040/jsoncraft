@@ -101,6 +101,7 @@ export default function Header() {
                       value={query}
                       onChange={(event) => setQuery(event.target.value)}
                       onClick={() => inputRef.current?.click()}
+                      onBlur={() => setTimeout(() => setQuery(""), 100)}
                     />
                     <Combobox.Button
                       className="absolute inset-y-0 right-0 flex items-center pr-2"

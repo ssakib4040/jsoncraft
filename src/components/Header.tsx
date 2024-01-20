@@ -1,9 +1,14 @@
 import { Fragment, useEffect, useState, useRef } from "react";
 import { Combobox, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import utils from "../utils";
+// import utils from "../utils";
 
-const people = [
+interface peopleInterface{
+  id: number;
+  name: string;
+}
+
+const people: peopleInterface[] = [
   { id: 1, name: "Wade Cooper" },
   { id: 2, name: "Arlene Mccoy" },
   { id: 3, name: "Devon Webb" },
@@ -51,12 +56,13 @@ export default function Header() {
                   <div className="relative w-full cursor-default overflow-hidden rounded-lg text-left shadow-md focus-visible:ring-offset-teal-300 sm:text-sm">
                     <Combobox.Input
                       className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-white focus-within:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-offset-white focus:ring-white"
-                      displayValue={(person) => person.name}
+                      displayValue={(person: peopleInterface) => person.name}
                       onChange={(event) => setQuery(event.target.value)}
                       onClick={() => inputRef.current?.click()}
                     />
                     <Combobox.Button
                       className="absolute inset-y-0 right-0 flex items-center pr-2"
+                      // @ts-expect-error this is a valid ref 
                       ref={inputRef}
                     >
                       <ChevronUpDownIcon

@@ -96,6 +96,7 @@ export default function Header() {
                   {/* input */}
                   <div className="relative w-full cursor-default overflow-hidden rounded-lg text-left shadow-md focus-visible:ring-offset-teal-300 sm:text-sm">
                     <Combobox.Input
+                      autoComplete="off"
                       placeholder="Search API functions"
                       className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-white focus-within:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-offset-white focus:ring-white"
                       value={query}

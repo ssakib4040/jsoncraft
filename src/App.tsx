@@ -98,10 +98,6 @@ export default function App() {
 
   const loader = <span className="loading loading-spinner loading-lg"></span>;
 
-  const options = {
-    fontSize: "13px",
-  };
-
   return (
     <>
       <Header />
@@ -111,7 +107,6 @@ export default function App() {
           <div className="flex flex-row ">
             <div className="lg:basis-6/12">
               <Editor
-                options={options}
                 width={firstContainerWidth}
                 loading={loader}
                 height="100vh"
@@ -136,7 +131,6 @@ export default function App() {
 
             <div className="lg:basis-6/12 relative">
               <Editor
-                options={options}
                 width={secondContainerWidth}
                 loading={loader}
                 height="100vh"

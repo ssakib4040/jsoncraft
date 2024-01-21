@@ -1,5 +1,23 @@
 import { faker } from "@faker-js/faker";
 
+// user 
+// - uuid
+// - fullName
+// - firstName
+// - lastName
+// - age
+// - gender
+// - email
+// - phone
+
+// utils 
+// - boolean
+// - profileImage
+// - password
+// - username
+// - imei
+
+
 function uuid() {
   return faker.string.uuid();
 }
@@ -92,6 +110,7 @@ function creditCard() {
 function ethereumAddress() {
   return faker.finance.ethereumAddress();
 }
+
 function pin() {
   return faker.finance.account();
 }

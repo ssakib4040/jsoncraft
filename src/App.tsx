@@ -1,9 +1,11 @@
-import { lazy, useEffect, useState } from "react";
-import Header from "./components/Header";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import type { editor } from "monaco-editor";
 
 const Editor = lazy(() => import("@monaco-editor/react"));
 
 import { defaultCode } from "./utils/constants";
+import utils from "./utils";
+import "./App.css";
 
 import {
   isValidJson,
@@ -11,36 +13,81 @@ import {
   processTemplateString,
 } from "./utils/internal";
 
+const functionDescriptions: Record<string, string> = {
+  uuid: "Generates a random UUID.",
+  fullName: "Creates a realistic full name.",
+  firstName: "Creates a random first name.",
+  lastName: "Creates a random last name.",
+  age: "Returns an age between 18 and 100.",
+  gender: "Picks male, female, or other.",
+  email: "Builds a random email address.",
+  phone: "Builds a phone number.",
+  boolean: "Returns true or false randomly.",
+  profileImage: "Creates an avatar image URL.",
+  password: "Creates a secure random password.",
+  username: "Creates a random username.",
+  imei: "Generates an IMEI number.",
+  color: "Generates an RGB color.",
+  productName: "Creates a product name.",
+  product: "Creates a product category.",
+  productPrice: "Creates a product price string.",
+  companyName: "Creates a company name.",
+  date: "Generates a random date.",
+  bitcoinAddress: "Creates a Bitcoin address.",
+  creditCard: "Creates a credit card number.",
+  ethereumAddress: "Creates an Ethereum address.",
+  pin: "Creates an account/pin-like number.",
+  imageUrl: "Creates a random image URL.",
+  imageBase64: "Creates a base64 image data URI.",
+  emoji: "Returns a random emoji.",
+  ip: "Generates an IP address.",
+  ipv4: "Generates an IPv4 address.",
+  ipv6: "Generates an IPv6 address.",
+  mac: "Generates a MAC address.",
+  city: "Creates a random city name.",
+  country: "Creates a random country name.",
+  countryCode: "Creates a random country code.",
+  street: "Creates a random street name.",
+  streetAddress: "Creates a random street address.",
+  timeZone: "Creates a random timezone.",
+  zipCode: "Creates a random zip code.",
+};
+
 export default function App() {
   const [code, setCode] = useState<string>(defaultCode);
-  const [generatedCode, setGeneratedCode] = useState("");
-  const [success, setSuccess] = useState({
-    copy: "",
-  });
-  const [errors, setErrors] = useState({
-    json: "",
-  });
+  const [generatedCode, setGeneratedCode] = useState<string>("[]");
+  const [copyStatus, setCopyStatus] = useState("");
+  const [jsonError, setJsonError] = useState("");
+  const [functionSearch, setFunctionSearch] = useState("");
+
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+
+  const apiFunctions = useMemo(() => Object.keys(utils), []);
+  const filteredFunctions = useMemo(() => {
+    const value = functionSearch.trim().toLowerCase();
+
+    if (!value) {
+      return apiFunctions;
+    }
+
+    return apiFunctions.filter((name) => name.toLowerCase().includes(value));
+  }, [apiFunctions, functionSearch]);
 
   useEffect(() => {
-    const processedString = finalProcessedInput(code) as string;
-    if (!processedString) return;
+    const processedString = finalProcessedInput(code);
+    if (!processedString) {
+      return;
+    }
 
-    setGeneratedCode(JSON.parse(processedString));
+    try {
+      const parsedOutput = JSON.parse(processedString);
+      setGeneratedCode(JSON.stringify(parsedOutput, null, 2));
+    } catch (_error) {
+      setJsonError("Processed output is not valid JSON.");
+      setGeneratedCode("[]");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
-
-  const [firstContainerWidth, setFirstContainerWidth] = useState(
-    window.innerWidth / 2
-  );
-  const [secondContainerWidth, setSecondContainerWidth] = useState(
-    window.innerWidth / 2
-  );
-  useEffect(() => {
-    window.addEventListener("resize", () => {
-      setFirstContainerWidth(window.innerWidth / 2);
-      setSecondContainerWidth(window.innerWidth / 2);
-    });
-  }, []);
 
   function generateNewJsonCode(newValue: string | undefined) {
     setCode(newValue || "");
@@ -48,44 +95,34 @@ export default function App() {
 
   function finalProcessedInput(jsonString: string): string | null {
     if (!isValidJson(jsonString)) {
-      setErrors({
-        ...errors,
-        json: "Invalid JSON input",
-      });
+      setJsonError("Invalid JSON input");
       return null;
     }
 
-    setErrors({
-      ...errors,
-      json: "",
-    });
-    const parsedData: unknown[] = JSON.parse(jsonString);
+    setJsonError("");
+    const parsedData = JSON.parse(jsonString);
+    const normalizedData: unknown[] = Array.isArray(parsedData)
+      ? parsedData
+      : [parsedData];
 
-    // detect for expression
-    const postForeachProcessedString: string = processForeachString(parsedData);
+    const postForeachProcessedString = processForeachString(normalizedData);
     const templateStringData = processTemplateString(
-      postForeachProcessedString
+      postForeachProcessedString,
     );
     return templateStringData;
   }
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(JSON.stringify(generatedCode, null, 2));
-
-    setSuccess({
-      ...success,
-      copy: "Copied to clipboard",
-    });
+    navigator.clipboard.writeText(generatedCode);
+    setCopyStatus("Copied output JSON");
 
     setTimeout(() => {
-      setSuccess({
-        ...success,
-        copy: "",
-      });
+      setCopyStatus("");
     }, 2000);
   };
+
   const handleDownload = () => {
-    const blob = new Blob([JSON.stringify(generatedCode, null, 2)], {
+    const blob = new Blob([generatedCode], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
@@ -94,103 +131,192 @@ export default function App() {
     const currentTimeStamp = new Date().getTime();
     link.download = `generated-${currentTimeStamp}.json`;
     link.click();
+    URL.revokeObjectURL(url);
   };
 
-  const loader = <span className="loading loading-spinner loading-lg"></span>;
+  const handleReset = () => {
+    setCode(defaultCode);
+    setCopyStatus("");
+    setJsonError("");
+  };
+
+  const insertFunctionToken = (functionName: string) => {
+    const token = `{{${functionName}()}}`;
+    const currentEditor = editorRef.current;
+
+    if (!currentEditor) {
+      setCode((prev) => `${prev}${prev.endsWith("\n") ? "" : "\n"}${token}`);
+      return;
+    }
+
+    const selection = currentEditor.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    currentEditor.executeEdits("insert-function-token", [
+      {
+        range: selection,
+        text: token,
+        forceMoveMarkers: true,
+      },
+    ]);
+
+    currentEditor.focus();
+    setCode(currentEditor.getValue());
+  };
+
+  const fallbackLoader = <div className="editor-loader">Loading editor...</div>;
 
   return (
-    <>
-      <Header />
+    <div className="app-shell">
+      <header className="app-header">
+        <div>
+          <p className="brand-kicker">Data Template Studio</p>
+          <h1 className="brand-title">JSONCraft</h1>
+        </div>
+        <a
+          href="https://github.com/ssakib4040/jsoncraft"
+          target="_blank"
+          rel="noreferrer"
+          className="repo-link"
+        >
+          View on GitHub
+        </a>
+      </header>
 
-      <div className="flex lg:h-[calc(100%-64px)] ">
-        <div className="basis-full overflow-y-hidden">
-          <div className="flex flex-row ">
-            <div className="lg:basis-6/12">
+      <main className="workspace-grid">
+        <aside className="panel panel-functions">
+          <div className="panel-header">
+            <h2>API Function Suggestions</h2>
+            <p>Click any function to insert into input editor.</p>
+          </div>
+
+          <input
+            value={functionSearch}
+            onChange={(event) => setFunctionSearch(event.target.value)}
+            placeholder="Search function..."
+            className="function-search"
+          />
+
+          <div className="function-list" role="list">
+            {filteredFunctions.map((functionName) => (
+              <button
+                key={functionName}
+                type="button"
+                onClick={() => insertFunctionToken(functionName)}
+                className="function-item"
+              >
+                <span className="function-signature">{`{{${functionName}()}}`}</span>
+                <span className="function-description">
+                  {functionDescriptions[functionName] ||
+                    "Generates dynamic value with faker."}
+                </span>
+              </button>
+            ))}
+
+            {!filteredFunctions.length && (
+              <p className="empty-functions">
+                No function matched your search.
+              </p>
+            )}
+          </div>
+        </aside>
+
+        <section className="panel panel-editor">
+          <div className="panel-header panel-header-inline">
+            <div>
+              <h2>Template Input</h2>
+              <p>Write JSON with tokens like {"{{firstName()}}"}.</p>
+            </div>
+            <button type="button" className="ghost-btn" onClick={handleReset}>
+              Reset sample
+            </button>
+          </div>
+
+          <div className="editor-wrap">
+            <Suspense fallback={fallbackLoader}>
               <Editor
-                width={firstContainerWidth}
-                loading={loader}
-                height="100vh"
+                loading={fallbackLoader}
+                height="100%"
                 theme="vs-dark"
                 defaultLanguage="json"
+                onMount={(editorInstance) => {
+                  editorRef.current = editorInstance;
+                }}
                 onChange={generateNewJsonCode}
                 value={code}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  fontFamily: "IBM Plex Mono, monospace",
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
+                }}
               />
+            </Suspense>
+          </div>
+        </section>
 
-              {errors.json && (
-                <div className="fixed bottom-[50px] bg-red-600 text-white rounded px-4 py-3">
-                  Invalid JSON input
-                </div>
-              )}
-
-              {success.copy && (
-                <div className="fixed bottom-[50px] bg-green-600 text-white rounded px-4 py-3">
-                  Copied to clipboard
-                </div>
-              )}
+        <section className="panel panel-output">
+          <div className="panel-header panel-header-inline">
+            <div>
+              <h2>Generated Output</h2>
+              <p>Preview result after template processing.</p>
             </div>
 
-            <div className="lg:basis-6/12 relative">
-              <Editor
-                width={secondContainerWidth}
-                loading={loader}
-                height="100vh"
-                theme="vs-dark"
-                defaultLanguage="json"
-                value={JSON.stringify(generatedCode, null, 2) || ""}
-              />
-
-              <div className="absolute top-[20px] right-[180px] flex">
-                <div className="bg-white rounded mx-1" onClick={handleCopy}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-8 h-8 text-black cursor-pointer"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"
-                    />
-                  </svg>
-                </div>
-                <div className="bg-white rounded mx-1" onClick={handleDownload}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-8 h-8 text-black cursor-pointer"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
-                    />
-                  </svg>
-                </div>
-              </div>
+            <div className="output-actions">
+              <button type="button" className="ghost-btn" onClick={handleCopy}>
+                Copy
+              </button>
+              <button
+                type="button"
+                className="accent-btn"
+                onClick={handleDownload}
+              >
+                Download
+              </button>
             </div>
           </div>
-        </div>
-      </div>
 
-      <footer className="fixed bottom-0 left-0 right-0 bg-zinc-800 z-[999] p-3 flex justify-between">
-        <div>
-          <a
-            href="#"
-            target="_blank"
-            rel="noreferrer"
-            className="text-white flex justify-center items-center"
-          >
-            Made in Bangladesh <img src="/bd-flag.svg" className="mx-2" />
-          </a>
+          <div className="editor-wrap">
+            <Suspense fallback={fallbackLoader}>
+              <Editor
+                loading={fallbackLoader}
+                height="100%"
+                theme="vs-dark"
+                defaultLanguage="json"
+                value={generatedCode}
+                options={{
+                  readOnly: true,
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  fontFamily: "IBM Plex Mono, monospace",
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
+                }}
+              />
+            </Suspense>
+          </div>
+        </section>
+      </main>
+
+      {(jsonError || copyStatus) && (
+        <div className={`status-toast ${jsonError ? "error" : "success"}`}>
+          {jsonError || copyStatus}
         </div>
-        <div></div>
+      )}
+
+      <footer className="app-footer">
+        <a
+          href="https://github.com/ssakib4040/jsoncraft"
+          target="_blank"
+          rel="noreferrer"
+          className="footer-link"
+        >
+          Made in Bangladesh <img src="/bd-flag.svg" className="flag" />
+        </a>
       </footer>
-    </>
+    </div>
   );
 }

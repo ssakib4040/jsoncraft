@@ -1,0 +1,358 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+:root {
+  --bg-top: #f9f7ef;
+  --bg-bottom: #e7f2ff;
+  --panel: #ffffff;
+  --text-main: #10223d;
+  --text-muted: #4b607f;
+  --line: #d7e2ef;
+  --accent: #0e7c86;
+  --accent-2: #ff7f50;
+  --danger: #c9382d;
+  --success: #1f7a3c;
+  --shadow: 0 20px 50px rgba(16, 34, 61, 0.12);
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(255, 170, 120, 0.25),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 85% 18%,
+      rgba(15, 147, 160, 0.16),
+      transparent 28%
+    ),
+    linear-gradient(165deg, var(--bg-top), var(--bg-bottom));
+}
+
+.app-shell {
+  height: 100vh;
+  overflow: hidden;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.brand-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.brand-title {
+  margin: 0;
+  font-family: "Archivo Black", sans-serif;
+  letter-spacing: 0.02em;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 1;
+}
+
+.repo-link {
+  text-decoration: none;
+  color: var(--text-main);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.74);
+  transition: all 180ms ease;
+}
+
+.repo-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.workspace-grid {
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+  display: grid;
+  grid-template-columns: 0.9fr 1.3fr 1.3fr;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.panel {
+  border: 1px solid rgba(215, 226, 239, 0.9);
+  border-radius: 20px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.97),
+    rgba(255, 255, 255, 0.93)
+  );
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+
+.panel-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.panel-header p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.panel-header-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.panel-functions {
+  animation: riseIn 450ms ease-out;
+}
+
+.panel-editor {
+  animation: riseIn 550ms ease-out;
+}
+
+.panel-output {
+  animation: riseIn 650ms ease-out;
+}
+
+.function-search {
+  margin: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+  font-size: 0.92rem;
+  color: var(--text-main);
+  background: #fdfefe;
+}
+
+.function-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(14, 124, 134, 0.12);
+}
+
+.function-list {
+  padding: 0 12px 16px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.function-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid #e7edf5;
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.function-item:hover {
+  border-color: var(--accent);
+  background: #f6fdff;
+  transform: translateX(2px);
+}
+
+.function-signature {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.function-description {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.empty-functions {
+  margin: 4px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.editor-wrap {
+  flex: 1;
+  min-height: 320px;
+  overflow: auto;
+}
+
+.editor-loader {
+  height: 100%;
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.output-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ghost-btn,
+.accent-btn {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.ghost-btn {
+  background: #f4f8ff;
+  border-color: #d7e2ef;
+  color: var(--text-main);
+}
+
+.ghost-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.accent-btn {
+  background: #ff7f50 !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  border: none !important;
+}
+
+.accent-btn:hover {
+  background: #ff9470;
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 127, 80, 0.3);
+}
+
+.status-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 70px;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  z-index: 100;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.status-toast.error {
+  background: var(--danger);
+}
+
+.status-toast.success {
+  background: var(--success);
+}
+
+.app-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.footer-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.flag {
+  width: 20px;
+  height: 14px;
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1280px) {
+  .workspace-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .panel-functions {
+    grid-column: span 2;
+    max-height: 280px;
+  }
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    padding: 14px;
+  }
+
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-functions {
+    grid-column: auto;
+    max-height: 280px;
+  }
+
+  .status-toast {
+    right: 12px;
+    left: 12px;
+    bottom: 12px;
+  }
+}
